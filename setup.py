@@ -37,7 +37,7 @@ setup(
     author_email='david@davidstephens.io',
     url='https://github.com/davidastephens/pandas-finance',
     classifiers=[
-        'Development Status :: 5 - Alpha',
+        'Development Status :: 1 - Planning',
         'Environment :: Console',
         'Intended Audience :: Science/Research',
         'Operating System :: OS Independent',

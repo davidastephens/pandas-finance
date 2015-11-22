@@ -1,6 +1,6 @@
-include README.md
+include README.rst
 include LICENSE.md
-include pandas_datareader/*.py
+include pandas_finance/*.py
 
-include pandas_datareader/tests/*.py
-include pandas_datareader/tests/data/*
+include pandas_finance/tests/*.py
+include pandas_finance/tests/data/*

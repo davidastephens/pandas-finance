@@ -1,0 +1,6 @@
+include README.md
+include LICENSE.md
+include pandas_datareader/*.py
+
+include pandas_datareader/tests/*.py
+include pandas_datareader/tests/data/*

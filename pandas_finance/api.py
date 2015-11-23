@@ -64,6 +64,7 @@ class Equity(object):
         return pdr.get_quote_yahoo(self.ticker)['last'][0]
 
     def hist_vol(self, days, end_date=None):
+        days = int(days)
         if end_date:
             data = self.returns[:end_date]
         else:
@@ -88,7 +89,36 @@ class OptionChain(object):
     def __init__(self, underlying):
         self.underlying = underlying
         self._session = self.underlying._session
+        self._pdr = pdr.Options(self.underlying.ticker, 'yahoo', session = self._session)
 
     @property
     def all_data(self):
-        return pdr.Options(self.underlying.ticker, 'yahoo', session=self._session).get_all_data()
+        return self._pdr.get_all_data()
+
+    @property
+    def calls(self):
+        data = self.all_data
+        mask = data.index.get_level_values('Type')=='call'
+        return data[mask]
+
+    @property
+    def puts(self):
+        data = self.all_data
+        mask = data.index.get_level_values('Type')=='put'
+        return data[mask]
+
+    @property
+    def near_puts(self):
+        return self._pdr.chop_data(self.puts, 5, self.underlying.price)
+
+    @property
+    def near_calls(self):
+        return self._pdr.chop_data(self.calls, 5, self.underlying.price)
+
+    def __getattr__(self,key):
+        if hasattr(self._pdr, key):
+            return getattr(self._pdr,key)
+
+    def __dir__(self):
+        return sorted(set((dir(type(self)) + list(self.__dict__) +
+                                      dir(self._pdr))))

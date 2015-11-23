@@ -24,7 +24,7 @@ def readme():
         return f.read()
 
 INSTALL_REQUIRES = (
-    ['pandas', 'requests', 'pandas-datareader']
+    ['pandas', 'requests', 'pandas-datareader', 'requests-cache']
 )
 
 setup(

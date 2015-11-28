@@ -25,7 +25,7 @@ class TestEquity(tm.TestCase):
         self.assertEqual(self.aapl.annual_dividend, 0.52*4)
 
     def test_dividends(self):
-        self.assertEqual(self.aapl.dividends[datetime.date(2015,11,05)],0.52)
+        self.assertEqual(self.aapl.dividends[datetime.date(2015,11,5)],0.52)
 
     def test_price(self):
         self.assertIsInstance(self.aapl.price, float)

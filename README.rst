@@ -35,4 +35,6 @@ Usage
    aapl.hist_vol(30)
    aapl.rolling_hist_vol(30)
 
+Data is automatically cached for 1 hr using requests_cache.
+
 See the `pandas-finance documentation <http://pandas-finance.readthedocs.org/>`_ for more details.

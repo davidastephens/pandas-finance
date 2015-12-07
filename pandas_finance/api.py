@@ -13,9 +13,13 @@ CACHE_HRS = 1
 
 class Equity(object):
 
-    def __init__(self, ticker):
+    def __init__(self, ticker, session=None):
         self.ticker = ticker
-        self._session = self._get_session()
+
+        if session:
+            self._session = session
+        else:
+            self._session = self._get_session()
 
     def _get_session(self):
         return requests_cache.CachedSession(cache_name='pf-cache', backend='sqlite', expire_after=datetime.timedelta(hours=CACHE_HRS))

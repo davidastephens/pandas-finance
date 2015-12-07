@@ -1,7 +1,7 @@
-pandas-datareader
+pandas-finance
 =================
 
-Up to date remote data access for pandas, works for multiple versions of pandas.
+High level API for access to financial data.
 
 .. image:: https://travis-ci.org/davidastephens/pandas-finance.svg?branch=master
     :target: https://travis-ci.org/davidastephens/pandas-finance

@@ -1,7 +1,7 @@
 pandas-finance
 =================
 
-High level API for access to financial data.
+High level API for access to and analysis of financial data.
 
 .. image:: https://travis-ci.org/davidastephens/pandas-finance.svg?branch=master
     :target: https://travis-ci.org/davidastephens/pandas-finance

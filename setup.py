@@ -30,7 +30,7 @@ INSTALL_REQUIRES = (
 setup(
     name=NAME,
     version=version(),
-    description="Libary of finance related tools using pandas and pandas-datareader.",
+    description="High level API for access to and analysis of financial data.",
     long_description=readme(),
     license='BSD License',
     author='David Stephens',

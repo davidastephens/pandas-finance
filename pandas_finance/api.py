@@ -22,7 +22,8 @@ class Equity(object):
             self._session = self._get_session()
 
     def _get_session(self):
-        return requests_cache.CachedSession(cache_name='pf-cache', backend='sqlite', expire_after=datetime.timedelta(hours=CACHE_HRS))
+        return requests_cache.CachedSession(cache_name='pf-cache', backend='sqlite',
+                expire_after=datetime.timedelta(hours=CACHE_HRS))
 
     @property
     def options(self):

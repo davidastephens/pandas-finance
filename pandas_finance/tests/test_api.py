@@ -1,6 +1,7 @@
 import datetime
 
 import pandas.util.testing as tm
+import pandas as pd
 
 from pandas_finance import Equity, Option, OptionChain
 
@@ -30,6 +31,7 @@ class TestEquity(tm.TestCase):
     def test_price(self):
         self.assertIsInstance(self.aapl.price, float)
 
+
 class TestOptionChain(tm.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -37,7 +39,25 @@ class TestOptionChain(tm.TestCase):
         cls.options = OptionChain(cls.aapl)
 
     def test_options(self):
-        self.options.all_data
+        self.assertIsInstance(self.options.all_data, pd.DataFrame)
+
+    def test_calls(self):
+        self.assertIsInstance(self.options.calls, pd.DataFrame)
+        self.assertTrue((self.options.calls.index.get_level_values('Type')=='call').all())
+
+    def test_puts(self):
+        self.assertIsInstance(self.options.puts, pd.DataFrame)
+        self.assertTrue((self.options.puts.index.get_level_values('Type')=='put').all())
+
+    def test_near_calls(self):
+        self.assertIsInstance(self.options.near_calls, pd.DataFrame)
+        self.assertTrue((self.options.near_calls.index.get_level_values('Type')=='call').all())
+
+    def test_near_puts(self):
+        self.assertIsInstance(self.options.near_puts, pd.DataFrame)
+        self.assertTrue((self.options.near_puts.index.get_level_values('Type')=='put').all())
+
+
 
 class TestOption(tm.TestCase):
     @classmethod

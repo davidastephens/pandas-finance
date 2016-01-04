@@ -31,6 +31,14 @@ class TestEquity(tm.TestCase):
     def test_price(self):
         self.assertIsInstance(self.aapl.price, float)
 
+    def test_sector(self):
+        self.assertEqual(self.aapl.sector, 'Consumer Goods')
+
+    def test_employees(self):
+        self.assertGreater(self.aapl.employees, 100000)
+
+    def test_industry(self):
+        self.assertEqual(self.aapl.industry, 'Electronic Equipment')
 
 class TestOptionChain(tm.TestCase):
     @classmethod

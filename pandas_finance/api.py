@@ -87,6 +87,30 @@ class Equity(object):
             data = self.returns
         return pd.rolling_std(data, window=days)*math.sqrt(TRADING_DAYS)
 
+    @property
+    def profile(self):
+        PROFILE_URL = 'http://finance.yahoo.com/q/pr?s={ticker}+Profile'.format(ticker=self.ticker)
+        page = self._session.get(PROFILE_URL).content
+        profile = pd.read_html(page)[5]
+        profile = profile.set_index(0)
+        profile.index.name = ""
+        profile = profile.iloc[:,0]
+        profile.name = ""
+        profile.index = [name.strip(':') for name in profile.index]
+        return profile
+
+    @property
+    def sector(self):
+        return self.profile['Sector']
+
+    @property
+    def industry(self):
+        return self.profile['Industry']
+
+    @property
+    def employees(self):
+        return int(self.profile['Full Time Employees'].replace(',',''))
+
 
 class Option(object):
     def __init__(self):

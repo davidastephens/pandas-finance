@@ -6,6 +6,7 @@ import pandas as pd
 import requests_cache
 
 import pandas_datareader.data as pdr
+from bs4 import BeautifulSoup
 from pandas_datareader.data import Options
 
 
@@ -22,6 +23,8 @@ class Equity(object):
             self._session = session
         else:
             self._session = self._get_session()
+
+        self.PROFILE_URL = 'http://finance.yahoo.com/q/pr?s={ticker}+Profile'.format(ticker=self.ticker)
 
     def _get_session(self):
         return requests_cache.CachedSession(cache_name='pf-cache', backend='sqlite',
@@ -89,8 +92,7 @@ class Equity(object):
 
     @property
     def profile(self):
-        PROFILE_URL = 'http://finance.yahoo.com/q/pr?s={ticker}+Profile'.format(ticker=self.ticker)
-        page = self._session.get(PROFILE_URL).content
+        page = self._session.get(self.PROFILE_URL).content
         profile = pd.read_html(page)[5]
         profile = profile.set_index(0)
         profile.index.name = ""
@@ -110,6 +112,12 @@ class Equity(object):
     @property
     def employees(self):
         return int(self.profile['Full Time Employees'].replace(',',''))
+
+    @property
+    def name(self):
+        page = self._session.get(self.PROFILE_URL).content
+        soup = BeautifulSoup(page)
+        return soup.find_all(class_='title')[0].text.split('-')[0].strip()
 
 
 class Option(object):

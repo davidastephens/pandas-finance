@@ -40,6 +40,9 @@ class TestEquity(tm.TestCase):
     def test_industry(self):
         self.assertEqual(self.aapl.industry, 'Electronic Equipment')
 
+    def test_name(self):
+        self.assertEqual(self.aapl.name, 'Apple Inc.')
+
 class TestOptionChain(tm.TestCase):
     @classmethod
     def setUpClass(cls):

@@ -113,7 +113,7 @@ class Equity(object):
     def name(self):
         page = self._session.get(self.PROFILE_URL).content
         soup = BeautifulSoup(page)
-        return soup.find_all(class_='title')[0].text.split('-')[0].strip()
+        return soup.find_all(class_='yfnc_modtitlew1')[0].b.text
 
 
 class Option(object):

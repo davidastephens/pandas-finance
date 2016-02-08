@@ -23,10 +23,10 @@ class TestEquity(tm.TestCase):
         self.assertIsInstance(self.aapl.options, OptionChain)
 
     def test_annual_dividend(self):
-        self.assertEqual(self.aapl.annual_dividend, 0.52*4)
+        self.assertEqual(self.aapl.annual_dividend, 0.52 * 4)
 
     def test_dividends(self):
-        self.assertEqual(self.aapl.dividends[datetime.date(2015,11,5)],0.52)
+        self.assertEqual(self.aapl.dividends[datetime.date(2015, 11, 5)], 0.52)
 
     def test_price(self):
         self.assertIsInstance(self.aapl.price, float)
@@ -43,6 +43,7 @@ class TestEquity(tm.TestCase):
     def test_name(self):
         self.assertEqual(self.aapl.name, 'Apple Inc.')
 
+
 class TestOptionChain(tm.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -54,20 +55,19 @@ class TestOptionChain(tm.TestCase):
 
     def test_calls(self):
         self.assertIsInstance(self.options.calls, pd.DataFrame)
-        self.assertTrue((self.options.calls.index.get_level_values('Type')=='call').all())
+        self.assertTrue((self.options.calls.index.get_level_values('Type') == 'call').all())
 
     def test_puts(self):
         self.assertIsInstance(self.options.puts, pd.DataFrame)
-        self.assertTrue((self.options.puts.index.get_level_values('Type')=='put').all())
+        self.assertTrue((self.options.puts.index.get_level_values('Type') == 'put').all())
 
     def test_near_calls(self):
         self.assertIsInstance(self.options.near_calls, pd.DataFrame)
-        self.assertTrue((self.options.near_calls.index.get_level_values('Type')=='call').all())
+        self.assertTrue((self.options.near_calls.index.get_level_values('Type') == 'call').all())
 
     def test_near_puts(self):
         self.assertIsInstance(self.options.near_puts, pd.DataFrame)
-        self.assertTrue((self.options.near_puts.index.get_level_values('Type')=='put').all())
-
+        self.assertTrue((self.options.near_puts.index.get_level_values('Type') == 'put').all())
 
 
 class TestOption(tm.TestCase):
@@ -78,5 +78,3 @@ class TestOption(tm.TestCase):
 
     def test_options(self):
         self.options.all_data
-
-

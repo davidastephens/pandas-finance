@@ -1,21 +1,17 @@
 import datetime
 import math
-import datetime
 
 import pandas as pd
-import requests_cache
-
 import pandas_datareader.data as pdr
+import requests_cache
 from bs4 import BeautifulSoup
-from pandas_datareader.data import Options
 
-
-TRADING_DAYS=252
+TRADING_DAYS = 252
 CACHE_HRS = 1
-START_DATE = datetime.date(1990,1,1)
+START_DATE = datetime.date(1990, 1, 1)
+
 
 class Equity(object):
-
     def __init__(self, ticker, session=None):
         self.ticker = ticker
 
@@ -28,7 +24,7 @@ class Equity(object):
 
     def _get_session(self):
         return requests_cache.CachedSession(cache_name='pf-cache', backend='sqlite',
-                expire_after=datetime.timedelta(hours=CACHE_HRS))
+                                            expire_after=datetime.timedelta(hours=CACHE_HRS))
 
     @property
     def options(self):
@@ -55,7 +51,7 @@ class Equity(object):
     @property
     def dividends(self):
         actions = pdr.DataReader(self.ticker, 'yahoo-actions', session=self._session)
-        dividends = actions[actions['action']=='DIVIDEND']
+        dividends = actions[actions['action'] == 'DIVIDEND']
         dividends = dividends['value']
         dividends.name = 'Dividends'
         return dividends.sort_index()
@@ -63,12 +59,12 @@ class Equity(object):
     @property
     def annual_dividend(self):
         time_between = self.dividends.index[-1] - self.dividends.index[-2]
-        times_per_year = round(365/time_between.days, 0)
+        times_per_year = round(365 / time_between.days, 0)
         return times_per_year * self.dividends.values[-1]
 
     @property
     def dividend_yield(self):
-        return self.annual_dividend/self.price
+        return self.annual_dividend / self.price
 
     @property
     def price(self):
@@ -81,14 +77,14 @@ class Equity(object):
         else:
             data = self.returns
         data = data.iloc[-days:]
-        return data.std()*math.sqrt(TRADING_DAYS)
+        return data.std() * math.sqrt(TRADING_DAYS)
 
     def rolling_hist_vol(self, days, end_date=None):
         if end_date:
             data = self.returns[:end_date]
         else:
             data = self.returns
-        return pd.rolling_std(data, window=days)*math.sqrt(TRADING_DAYS)
+        return pd.rolling_std(data, window=days) * math.sqrt(TRADING_DAYS)
 
     @property
     def profile(self):
@@ -96,7 +92,7 @@ class Equity(object):
         profile = pd.read_html(page)[5]
         profile = profile.set_index(0)
         profile.index.name = ""
-        profile = profile.iloc[:,0]
+        profile = profile.iloc[:, 0]
         profile.name = ""
         profile.index = [name.strip(':') for name in profile.index]
         return profile
@@ -111,7 +107,7 @@ class Equity(object):
 
     @property
     def employees(self):
-        return int(self.profile['Full Time Employees'].replace(',',''))
+        return int(self.profile['Full Time Employees'].replace(',', ''))
 
     @property
     def name(self):
@@ -129,7 +125,7 @@ class OptionChain(object):
     def __init__(self, underlying):
         self.underlying = underlying
         self._session = self.underlying._session
-        self._pdr = pdr.Options(self.underlying.ticker, 'yahoo', session = self._session)
+        self._pdr = pdr.Options(self.underlying.ticker, 'yahoo', session=self._session)
 
     @property
     def all_data(self):
@@ -138,13 +134,13 @@ class OptionChain(object):
     @property
     def calls(self):
         data = self.all_data
-        mask = data.index.get_level_values('Type')=='call'
+        mask = data.index.get_level_values('Type') == 'call'
         return data[mask]
 
     @property
     def puts(self):
         data = self.all_data
-        mask = data.index.get_level_values('Type')=='put'
+        mask = data.index.get_level_values('Type') == 'put'
         return data[mask]
 
     @property
@@ -155,10 +151,10 @@ class OptionChain(object):
     def near_calls(self):
         return self._pdr.chop_data(self.calls, 5, self.underlying.price)
 
-    def __getattr__(self,key):
+    def __getattr__(self, key):
         if hasattr(self._pdr, key):
-            return getattr(self._pdr,key)
+            return getattr(self._pdr, key)
 
     def __dir__(self):
         return sorted(set((dir(type(self)) + list(self.__dict__) +
-                                      dir(self._pdr))))
+                           dir(self._pdr))))

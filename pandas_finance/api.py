@@ -2,6 +2,8 @@ import datetime
 import math
 
 import pandas as pd
+import mibian
+
 import pandas_datareader.data as pdr
 import requests_cache
 import empyrical
@@ -180,8 +182,154 @@ class Equity(object):
 
 
 class Option(object):
-    def __init__(self):
-        pass
+
+    _CALL_TYPES = ['c','call']
+    _PUT_TYPES = ['p','put']
+    _VALID_TYPES = _CALL_TYPES + _PUT_TYPES
+
+    def __init__(self, underlying, expiry, strike, type, price=None, volatility=None,
+            valuation_date=None, interest_rate=None):
+
+        self.underlying = underlying
+        self.expiry = expiry
+        self.strike = strike
+        self.type = type
+        self.price = price
+
+        self._validate_type()
+
+        if valuation_date:
+            self.valuation_date = valuation_date
+        else:
+            self.valuation_date = datetime.date.today()
+
+        if interest_rate:
+            self.interest_rate = interest_rate
+        else:
+            # TODO: get appropriate interest rate
+            # TODO: Document that interest rate should be in decimal form
+            self.interest_rate = 0.005
+
+        if volatility:
+            # TODO: Document that volatility should be in decimal form
+            self.volatility = volatility
+        else:
+            # Use historical volatility for same time period if none given
+            # TODO: Business days vs trading days issue here (hist_vol is
+            # trading days)
+            self.volatility = self.historical_volatility
+
+    @property
+    def _me(self):
+        return mibian.Me([
+            self.underlying.price,
+            self.strike,
+            self.interest_rate * 100,
+            self.underlying.annual_dividend,
+            self.days_to_expiration],
+            self.volatility *100,
+            )
+
+    @property
+    def _me_implied_vol(self):
+        return mibian.Me([
+            self.underlying.price,
+            self.strike,
+            self.interest_rate * 100,
+            self.underlying.annual_dividend,
+            self.days_to_expiration],
+            self.volatility *100,
+            self._call_price,
+            self._put_price
+            )
+
+    @property
+    def _me_at_implied_vol(self):
+        return mibian.Me([
+            self.underlying.price,
+            self.strike,
+            self.interest_rate * 100,
+            self.underlying.annual_dividend,
+            self.days_to_expiration],
+            self.implied_volatility *100,
+            )
+
+    def _validate_type(self):
+        if self.type.lower() not in self._VALID_TYPES:
+            raise ValueError('{type} not a valid option type.  Valid types are {types}'.format(
+                type=self.type, types = ','.join(self._VALID_TYPES)))
+
+    @property
+    def _is_call(self):
+        return self.type.lower() in self._CALL_TYPES
+
+    @property
+    def _is_put(self):
+        return self.type.lower() in self._PUT_TYPES
+
+    @property
+    def _call_price(self):
+        if self._is_call:
+            return self.price
+        else:
+            return None
+
+    @property
+    def _put_price(self):
+        if self._is_put:
+            return self.price
+        else:
+            return None
+
+    @property
+    def value(self):
+        if self._is_call:
+            return self._me.callPrice
+        elif self._is_put:
+            return self._me.putPrice
+
+    @property
+    def days_to_expiration(self):
+        return (self.expiry - self.valuation_date).days
+
+    @property
+    def delta(self):
+        if self._is_call:
+            return self._me.callDelta
+        elif self._is_put:
+            return self._me.putDelta
+
+    @property
+    def vega(self):
+        return self._me.vega
+
+    @property
+    def theta(self):
+        if self._is_call:
+            return self._me.callTheta
+        elif self._is_put:
+            return self._me.putTheta
+
+    @property
+    def rho(self):
+        if self._is_call:
+            return self._me.callRho
+        elif self._is_put:
+            return self._me.putRho
+
+    @property
+    def gamma(self):
+        return self._me.gamma
+
+    @property
+    def implied_volatility(self):
+        if not self.price:
+            raise ValueError('Provide an option price in order to calculate Implied Volatility')
+        return self._me_implied_vol.impliedVolatility/100
+
+    @property
+    def historical_volatility(self):
+        return self.underlying.hist_vol(self.days_to_expiration)
 
 
 class OptionChain(object):

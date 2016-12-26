@@ -24,7 +24,7 @@ def readme():
         return f.read()
 
 INSTALL_REQUIRES = (
-    ['pandas', 'requests', 'pandas-datareader>=0.2.1', 'requests-cache', 'beautifulsoup4']
+        ['pandas', 'requests', 'requests-cache', 'beautifulsoup4', 'pandas-datareader>=0.2.2']
 )
 
 setup(
@@ -54,6 +54,7 @@ setup(
     ],
     keywords='data',
     install_requires=INSTALL_REQUIRES,
+    dependency_links=['http://github.com/pydata/pandas-datareader/tarball/master#egg=pandas-datareader-0.2.2'],
     packages=find_packages(exclude=['contrib', 'docs', 'tests*']),
     test_suite='tests',
     zip_safe=False,

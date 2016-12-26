@@ -23,7 +23,7 @@ class TestEquity(tm.TestCase):
         self.assertIsInstance(self.aapl.options, OptionChain)
 
     def test_annual_dividend(self):
-        self.assertEqual(self.aapl.annual_dividend, 0.52 * 4)
+        self.assertEqual(self.aapl.annual_dividend, 0.57 * 4)
 
     def test_dividends(self):
         self.assertEqual(self.aapl.dividends[datetime.date(2015, 11, 5)], 0.52)
@@ -55,19 +55,19 @@ class TestOptionChain(tm.TestCase):
 
     def test_calls(self):
         self.assertIsInstance(self.options.calls, pd.DataFrame)
-        self.assertTrue((self.options.calls.index.get_level_values('Type') == 'call').all())
+        self.assertTrue((self.options.calls.index.get_level_values('Type') == 'calls').all())
 
     def test_puts(self):
         self.assertIsInstance(self.options.puts, pd.DataFrame)
-        self.assertTrue((self.options.puts.index.get_level_values('Type') == 'put').all())
+        self.assertTrue((self.options.puts.index.get_level_values('Type') == 'puts').all())
 
     def test_near_calls(self):
         self.assertIsInstance(self.options.near_calls, pd.DataFrame)
-        self.assertTrue((self.options.near_calls.index.get_level_values('Type') == 'call').all())
+        self.assertTrue((self.options.near_calls.index.get_level_values('Type') == 'calls').all())
 
     def test_near_puts(self):
         self.assertIsInstance(self.options.near_puts, pd.DataFrame)
-        self.assertTrue((self.options.near_puts.index.get_level_values('Type') == 'put').all())
+        self.assertTrue((self.options.near_puts.index.get_level_values('Type') == 'puts').all())
 
 
 class TestOption(tm.TestCase):

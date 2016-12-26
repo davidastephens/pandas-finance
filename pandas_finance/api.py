@@ -9,6 +9,9 @@ from bs4 import BeautifulSoup
 TRADING_DAYS = 252
 CACHE_HRS = 1
 START_DATE = datetime.date(1990, 1, 1)
+QUERY_STRING = 'https://query1.finance.yahoo.com/v10/finance/quoteSummary/{ticker}?lang=en-US&region=US&modules={modules}&corsDomain=finance.yahoo.com'
+YQL_STRING = 'https://query.yahooapis.com/v1/public/yql?env=store://datatables.org/alltableswithkeys&format=json&q={yql}'
+YQL_QUOTES = 'select * from yahoo.finance.quotes where symbol = "{ticker}"'
 
 
 class Equity(object):
@@ -19,8 +22,6 @@ class Equity(object):
             self._session = session
         else:
             self._session = self._get_session()
-
-        self.PROFILE_URL = 'http://finance.yahoo.com/q/pr?s={ticker}+Profile'.format(ticker=self.ticker)
 
     def _get_session(self):
         return requests_cache.CachedSession(cache_name='pf-cache', backend='sqlite',
@@ -88,14 +89,22 @@ class Equity(object):
 
     @property
     def profile(self):
-        page = self._session.get(self.PROFILE_URL).content
-        profile = pd.read_html(page)[5]
-        profile = profile.set_index(0)
-        profile.index.name = ""
-        profile = profile.iloc[:, 0]
+        response = self._session.get(QUERY_STRING.format(ticker=self.ticker, modules='assetProfile')).json()
+        asset_profile = response['quoteSummary']['result'][0]['assetProfile']
+        del asset_profile['companyOfficers']
+        profile = pd.DataFrame.from_dict(asset_profile, orient='index')[0]
         profile.name = ""
-        profile.index = [name.strip(':') for name in profile.index]
+        profile.index = [name.capitalize() for name in profile.index]
+        rename = {'Fulltimeemployees': 'Full Time Employees'}
+        profile.rename(index=rename, inplace=True)
+
         return profile
+
+    @property
+    def quotes(self):
+        response = self._session.get(YQL_STRING.format(yql=YQL_QUOTES.format(ticker=self.ticker))).json()
+        quotes = pd.DataFrame.from_dict(response['query']['results']['quote'], orient='index')[0]
+        return quotes
 
     @property
     def sector(self):
@@ -107,14 +116,11 @@ class Equity(object):
 
     @property
     def employees(self):
-        return int(self.profile['Full Time Employees'].replace(',', ''))
+        return self.profile['Full Time Employees']
 
     @property
     def name(self):
-        page = self._session.get(self.PROFILE_URL).content
-        soup = BeautifulSoup(page)
-        return soup.find_all(class_='yfnc_modtitlew1')[0].b.text
-
+        return self.quotes['Name']
 
 class Option(object):
     def __init__(self):
@@ -134,22 +140,22 @@ class OptionChain(object):
     @property
     def calls(self):
         data = self.all_data
-        mask = data.index.get_level_values('Type') == 'call'
+        mask = data.index.get_level_values('Type') == 'calls'
         return data[mask]
 
     @property
     def puts(self):
         data = self.all_data
-        mask = data.index.get_level_values('Type') == 'put'
+        mask = data.index.get_level_values('Type') == 'puts'
         return data[mask]
 
     @property
     def near_puts(self):
-        return self._pdr.chop_data(self.puts, 5, self.underlying.price)
+        return self._pdr._chop_data(self.puts, 5, self.underlying.price)
 
     @property
     def near_calls(self):
-        return self._pdr.chop_data(self.calls, 5, self.underlying.price)
+        return self._pdr._chop_data(self.calls, 5, self.underlying.price)
 
     def __getattr__(self, key):
         if hasattr(self._pdr, key):

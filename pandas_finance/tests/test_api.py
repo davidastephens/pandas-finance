@@ -11,6 +11,7 @@ class TestEquity(tm.TestCase):
     def setUpClass(cls):
         cls.aapl = Equity('AAPL')
         cls.date = datetime.date(2013, 1, 25)
+        cls.tsla = Equity('TSLA')
 
     def test_equity_price(self):
         self.assertAlmostEqual(self.aapl.close[self.date], 439.88, 2)
@@ -27,6 +28,9 @@ class TestEquity(tm.TestCase):
 
     def test_dividends(self):
         self.assertEqual(self.aapl.dividends[datetime.date(2015, 11, 5)], 0.52)
+    
+    def test_dividends_no_datas(self):
+        self.assertEqual(len(self.tsla.dividends), 0)
 
     def test_price(self):
         self.assertIsInstance(self.aapl.price, float)

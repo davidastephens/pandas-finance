@@ -52,16 +52,23 @@ class Equity(object):
     @property
     def dividends(self):
         actions = pdr.DataReader(self.ticker, 'yahoo-actions', session=self._session)
-        dividends = actions[actions['action'] == 'DIVIDEND']
-        dividends = dividends['value']
-        dividends.name = 'Dividends'
-        return dividends.sort_index()
+        if len(actions) > 0:
+            dividends = actions[actions['action'] == 'DIVIDEND']
+            dividends = dividends['value']
+            dividends.name = 'Dividends'
+            return dividends.sort_index()
+        else:
+            return actions # Empty DataFram
 
     @property
     def annual_dividend(self):
-        time_between = self.dividends.index[-1] - self.dividends.index[-2]
-        times_per_year = round(365 / time_between.days, 0)
-        return times_per_year * self.dividends.values[-1]
+        # TODO: Likely a better way of getting the annual dividend
+        if len(self.dividends) >= 2:
+            time_between = self.dividends.index[-1] - self.dividends.index[-2]
+            times_per_year = round(365 / time_between.days, 0)
+            return times_per_year * self.dividends.values[-1]
+        else:
+            return 0
 
     @property
     def dividend_yield(self):

@@ -6,6 +6,8 @@ import pandas_datareader.data as pdr
 import requests_cache
 from bs4 import BeautifulSoup
 
+import empyrical
+
 TRADING_DAYS = 252
 CACHE_HRS = 1
 START_DATE = datetime.date(1990, 1, 1)
@@ -15,17 +17,8 @@ YQL_QUOTES = 'select * from yahoo.finance.quotes where symbol = "{ticker}"'
 
 
 class Equity(object):
-    def __init__(self, ticker, session=None):
+    def __init__(self, ticker):
         self.ticker = ticker
-
-        if session:
-            self._session = session
-        else:
-            self._session = self._get_session()
-
-    def _get_session(self):
-        return requests_cache.CachedSession(cache_name='pf-cache', backend='sqlite',
-                                            expire_after=datetime.timedelta(hours=CACHE_HRS))
 
     @property
     def options(self):
@@ -47,11 +40,11 @@ class Equity(object):
 
     @property
     def trading_data(self):
-        return pdr.DataReader(self.ticker, 'yahoo', session=self._session, start=START_DATE)
+        return pdr.DataReader(self.ticker, 'yahoo', start=START_DATE)
 
     @property
     def dividends(self):
-        actions = pdr.DataReader(self.ticker, 'yahoo-actions', session=self._session)
+        actions = pdr.DataReader(self.ticker, 'yahoo-actions' )
         if len(actions) > 0:
             dividends = actions[actions['action'] == 'DIVIDEND']
             dividends = dividends['value']
@@ -128,6 +121,33 @@ class Equity(object):
     @property
     def name(self):
         return self.quotes['Name']
+
+    def alpha_beta(self, index, start=None, end=None):
+        index_rets = Equity(index).returns
+        rets = self.returns
+        data = pd.DataFrame()
+        data['Index'] = index_rets
+        data['Rets'] = rets
+        data = data.fillna(0)
+
+        if start:
+            data = data[start:]
+        if end:
+            data = data[start:end]
+
+        return empyrical.alpha_beta(data['Rets'], data['Index'])
+
+    def beta(self, index, start=None, end=None):
+        alpha, beta = self.alpha_beta(index, start, end)
+        return beta
+
+    def alpha(self, index, start=None, end=None):
+        alpha, beta = self.alpha_beta(index, start, end)
+        return alpha
+
+
+
+
 
 class Option(object):
     def __init__(self):

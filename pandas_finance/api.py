@@ -4,6 +4,7 @@ import math
 import pandas as pd
 import pandas_datareader.data as pdr
 import requests_cache
+import requests
 from bs4 import BeautifulSoup
 
 import empyrical
@@ -17,9 +18,17 @@ YQL_QUOTES = 'select * from yahoo.finance.quotes where symbol = "{ticker}"'
 
 
 class Equity(object):
-    def __init__(self, ticker):
+    def __init__(self, ticker, session=None):
         self.ticker = ticker
 
+        if session:
+            self._session = session
+        else:
+            self._session = self._get_session()
+
+    def _get_session(self):
+        return requests_cache.CachedSession(cache_name='pf-cache', backend='sqlite',
+                                            expire_after=datetime.timedelta(hours=CACHE_HRS))
     @property
     def options(self):
         return OptionChain(self)
@@ -40,18 +49,14 @@ class Equity(object):
 
     @property
     def trading_data(self):
-        return pdr.DataReader(self.ticker, 'yahoo', start=START_DATE)
+        return pdr.get_data_yahoo(self.ticker, session=self._session, start=START_DATE)['prices']
 
     @property
     def dividends(self):
-        actions = pdr.DataReader(self.ticker, 'yahoo-actions' )
-        if len(actions) > 0:
-            dividends = actions[actions['action'] == 'DIVIDEND']
-            dividends = dividends['value']
-            dividends.name = 'Dividends'
-            return dividends.sort_index()
-        else:
-            return actions # Empty DataFram
+        actions = pdr.get_data_yahoo(self.ticker, session=self._session, start=START_DATE)
+        dividends = actions['dividends']['Amount']
+        dividends.name = 'Dividends'
+        return dividends
 
     @property
     def annual_dividend(self):
@@ -69,7 +74,7 @@ class Equity(object):
 
     @property
     def price(self):
-        return pdr.get_quote_yahoo(self.ticker)['last'][0]
+        return self.close[-1]
 
     def hist_vol(self, days, end_date=None):
         days = int(days)

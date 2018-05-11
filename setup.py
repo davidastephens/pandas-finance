@@ -24,7 +24,13 @@ def readme():
         return f.read()
 
 INSTALL_REQUIRES = (
-        ['pandas', 'requests', 'requests-cache', 'beautifulsoup4', 'pandas-datareader>=0.7.0']
+        ['pandas',
+         'requests',
+         'requests-cache',
+         'beautifulsoup4',
+         'pandas-datareader>=0.7.0',
+         'empyrical',
+         ]
 )
 
 setup(

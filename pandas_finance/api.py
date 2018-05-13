@@ -150,8 +150,14 @@ class Equity(object):
         alpha, beta = self.alpha_beta(index, start, end)
         return alpha
 
-
-
+    def vwap(self, end_date=None, days=30):
+        days = int(days)
+        if end_date:
+            data = self.trading_data[:end_date]
+        else:
+            data = self.trading_data
+        data = data.iloc[-days:]
+        return (data['Close'] * data['Volume']).sum() / data['Volume'].sum()
 
 
 class Option(object):

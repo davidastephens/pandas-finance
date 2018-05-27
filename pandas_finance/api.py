@@ -49,7 +49,7 @@ class Equity(object):
 
     @property
     def trading_data(self):
-        return pdr.get_data_yahoo(self.ticker, session=self._session, start=START_DATE)['prices']
+        return pdr.get_data_yahoo(self.ticker, session=self._session, start=START_DATE)
 
     @property
     def dividends(self):

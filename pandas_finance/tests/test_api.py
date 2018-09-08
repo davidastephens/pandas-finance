@@ -20,17 +20,18 @@ class TestEquity(unittest.TestCase):
     def test_historical_vol(self):
         vol = self.aapl.hist_vol(30, end_date=self.date)
         self.assertAlmostEqual(vol, 0.484, 3)
+    
     @pytest.mark.xfail(reason='Yahoo options api broken')
     def test_options(self):
         self.assertIsInstance(self.aapl.options, OptionChain)
 
     def test_annual_dividend(self):
-        self.assertEqual(self.aapl.annual_dividend, 0.63 * 4)
+        self.assertEqual(self.aapl.annual_dividend, 2.62)
 
     def test_dividends(self):
         self.assertEqual(self.aapl.dividends[datetime.date(2015, 11, 5)], 0.52)
 
-    def test_dividends_no_datas(self):
+    def test_dividends_no_data(self):
         self.assertEqual(len(self.tsla.dividends), 0)
 
     def test_price(self):
@@ -47,6 +48,24 @@ class TestEquity(unittest.TestCase):
 
     def test_name(self):
         self.assertEqual(self.aapl.name, 'Apple Inc.')
+    
+    def test_quotes(self):
+        self.assertIsInstance(self.aapl.quotes['price'], float)
+    
+    def test_quote(self):
+        self.assertIsInstance(self.aapl.quote['price'], float)
+    
+    def test_shares_os(self):
+        self.assertIsInstance(self.aapl.shares_os, int)
+    
+    def test_market_cap(self):
+        self.assertIsInstance(self.aapl.market_cap , float)
+    
+    def test_closed(self):
+        self.assertIsInstance(self.aapl.closed, bool)
+
+    def test_currency(self):
+        self.assertEqual(self.aapl.currency, 'USD')
 
 
 class TestOptionChain(unittest.TestCase):

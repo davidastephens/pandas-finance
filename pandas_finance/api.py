@@ -53,20 +53,14 @@ class Equity(object):
 
     @property
     def dividends(self):
-        actions = pdr.get_data_yahoo(self.ticker, session=self._session, start=START_DATE)
-        dividends = actions['dividends']['Amount']
+        actions = pdr.get_data_yahoo_actions(self.ticker, session=self._session, start=START_DATE)
+        dividends = actions[actions['action']=='DIVIDEND']['value']
         dividends.name = 'Dividends'
         return dividends
 
     @property
     def annual_dividend(self):
-        # TODO: Likely a better way of getting the annual dividend
-        if len(self.dividends) >= 2:
-            time_between = self.dividends.index[-1] - self.dividends.index[-2]
-            times_per_year = round(365 / time_between.days, 0)
-            return times_per_year * self.dividends.values[-1]
-        else:
-            return 0
+        return self.quotes['trailingAnnualDividendRate']
 
     @property
     def dividend_yield(self):
@@ -74,7 +68,24 @@ class Equity(object):
 
     @property
     def price(self):
-        return self.close[-1]
+        return self.quotes['price']
+    
+    @property
+    def closed(self):
+        "Market is closed or open"
+        return self.quotes['marketState'].lower() == 'closed'
+    
+    @property
+    def currency(self):
+        return self.quotes['currency']
+    
+    @property
+    def market_cap(self):
+        return self.quotes['marketCap']
+    
+    @property
+    def shares_os(self):
+        return self.quotes['sharesOutstanding']
 
     def hist_vol(self, days, end_date=None):
         days = int(days)
@@ -107,9 +118,11 @@ class Equity(object):
 
     @property
     def quotes(self):
-        response = self._session.get(YQL_STRING.format(yql=YQL_QUOTES.format(ticker=self.ticker))).json()
-        quotes = pd.DataFrame.from_dict(response['query']['results']['quote'], orient='index')[0]
-        return quotes
+        return pdr.get_quote_yahoo(self.ticker).T[self.ticker]
+    
+    @property
+    def quote(self):
+        return self.quotes
 
     @property
     def sector(self):
@@ -125,7 +138,7 @@ class Equity(object):
 
     @property
     def name(self):
-        return self.quotes['Name']
+        return self.quotes['longName']
 
     def alpha_beta(self, index, start=None, end=None):
         index_rets = Equity(index).returns

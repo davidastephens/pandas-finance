@@ -60,7 +60,10 @@ class Equity(object):
 
     @property
     def annual_dividend(self):
-        return self.quotes['trailingAnnualDividendRate']
+        if 'trailingAnnualDividendRate' in self.quotes.index:
+            return self.quotes['trailingAnnualDividendRate']
+        else:
+            return 0
 
     @property
     def dividend_yield(self):
@@ -81,11 +84,11 @@ class Equity(object):
     
     @property
     def market_cap(self):
-        return self.quotes['marketCap']
+        return float(self.quotes['marketCap'])
     
     @property
     def shares_os(self):
-        return self.quotes['sharesOutstanding']
+        return int(self.quotes['sharesOutstanding'])
 
     def hist_vol(self, days, end_date=None):
         days = int(days)

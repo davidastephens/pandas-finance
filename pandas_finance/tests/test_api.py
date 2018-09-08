@@ -27,6 +27,7 @@ class TestEquity(unittest.TestCase):
 
     def test_annual_dividend(self):
         self.assertEqual(self.aapl.annual_dividend, 2.62)
+        self.assertEqual(self.tsla.annual_dividend, 0)
 
     def test_dividends(self):
         self.assertEqual(self.aapl.dividends[datetime.date(2015, 11, 5)], 0.52)

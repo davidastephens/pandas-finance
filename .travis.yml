@@ -3,10 +3,11 @@ sudo: false
 language: python
 
 env:
-  - PYTHON=2.7 PANDAS=0.15.1
-  - PYTHON=3.4 PANDAS=0.16.2
-  - PYTHON=3.4 PANDAS=0.17.1
-  - PYTHON=3.5 PANDAS=0.17.1
+  - PYTHON=2.7 PANDAS=0.19.2
+  - PYTHON=3.4 PANDAS=0.22
+  - PYTHON=3.4 PANDAS=0.19.2
+  - PYTHON=3.5 PANDAS=0.20.3
+  - PYTHON=3.6 PANDAS=0.23.0
 
 matrix:
     allow_failures:

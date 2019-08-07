@@ -124,7 +124,7 @@ class Equity(object):
 
     @property
     def quotes(self):
-        return pdr.get_quote_yahoo(self.ticker).T[self.ticker]
+        return pdr.get_quote_yahoo(self.ticker, session=self._session).T[self.ticker]
 
     @property
     def quote(self):

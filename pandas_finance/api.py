@@ -24,8 +24,11 @@ class Equity(object):
             self._session = self._get_session()
 
     def _get_session(self):
-        return requests_cache.CachedSession(cache_name='pf-cache', backend='sqlite',
-                                            expire_after=datetime.timedelta(hours=CACHE_HRS))
+        return requests_cache.CachedSession(cache_name='pf-cache',
+                                            backend='sqlite',
+                                            expire_after=datetime.timedelta(
+                                                hours=CACHE_HRS))
+
     @property
     def options(self):
         return OptionChain(self)
@@ -46,12 +49,14 @@ class Equity(object):
 
     @property
     def trading_data(self):
-        return pdr.get_data_yahoo(self.ticker, session=self._session, start=START_DATE)
+        return pdr.get_data_yahoo(self.ticker, session=self._session,
+                                  start=START_DATE)
 
     @property
     def dividends(self):
-        actions = pdr.get_data_yahoo_actions(self.ticker, session=self._session, start=START_DATE)
-        dividends = actions[actions['action']=='DIVIDEND']['value']
+        actions = pdr.get_data_yahoo_actions(self.ticker, session=self._session,
+                                             start=START_DATE)
+        dividends = actions[actions['action'] == 'DIVIDEND']['value']
         dividends.name = 'Dividends'
         return dividends
 
@@ -69,20 +74,20 @@ class Equity(object):
     @property
     def price(self):
         return self.quotes['price']
-    
+
     @property
     def closed(self):
         "Market is closed or open"
         return self.quotes['marketState'].lower() == 'closed'
-    
+
     @property
     def currency(self):
         return self.quotes['currency']
-    
+
     @property
     def market_cap(self):
         return float(self.quotes['marketCap'])
-    
+
     @property
     def shares_os(self):
         return int(self.quotes['sharesOutstanding'])
@@ -105,7 +110,8 @@ class Equity(object):
 
     @property
     def profile(self):
-        response = self._session.get(QUERY_STRING.format(ticker=self.ticker, modules='assetProfile')).json()
+        response = self._session.get(QUERY_STRING.format(ticker=self.ticker,
+                                                         modules='assetProfile')).json()
         asset_profile = response['quoteSummary']['result'][0]['assetProfile']
         del asset_profile['companyOfficers']
         profile = pd.DataFrame.from_dict(asset_profile, orient='index')[0]
@@ -119,7 +125,7 @@ class Equity(object):
     @property
     def quotes(self):
         return pdr.get_quote_yahoo(self.ticker).T[self.ticker]
-    
+
     @property
     def quote(self):
         return self.quotes
@@ -182,7 +188,8 @@ class OptionChain(object):
     def __init__(self, underlying):
         self.underlying = underlying
         self._session = self.underlying._session
-        self._pdr = pdr.Options(self.underlying.ticker, 'yahoo', session=self._session)
+        self._pdr = pdr.Options(self.underlying.ticker, 'yahoo',
+                                session=self._session)
 
     @property
     def all_data(self):

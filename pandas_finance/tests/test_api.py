@@ -1,10 +1,9 @@
 import datetime
 import unittest 
-import pytest
 
 import pandas as pd
 
-from pandas_finance import Equity, Option, OptionChain
+from pandas_finance import Equity, OptionChain
 
 
 class TestEquity(unittest.TestCase):
@@ -21,12 +20,12 @@ class TestEquity(unittest.TestCase):
         vol = self.aapl.hist_vol(30, end_date=self.date)
         self.assertAlmostEqual(vol, 0.484, 3)
     
-    @pytest.mark.xfail(reason='Yahoo options api broken')
+    @unittest.skip('Yahoo options api broken')
     def test_options(self):
         self.assertIsInstance(self.aapl.options, OptionChain)
 
     def test_annual_dividend(self):
-        self.assertEqual(self.aapl.annual_dividend, 2.62)
+        self.assertEqual(self.aapl.annual_dividend, 2.96)
         self.assertEqual(self.tsla.annual_dividend, 0)
 
     def test_dividends(self):
@@ -60,7 +59,7 @@ class TestEquity(unittest.TestCase):
         self.assertIsInstance(self.aapl.shares_os, int)
     
     def test_market_cap(self):
-        self.assertIsInstance(self.aapl.market_cap , float)
+        self.assertIsInstance(self.aapl.market_cap, float)
     
     def test_closed(self):
         self.assertIsInstance(self.aapl.closed, bool)
@@ -71,8 +70,8 @@ class TestEquity(unittest.TestCase):
 
 class TestOptionChain(unittest.TestCase):
     @classmethod
+    @unittest.skip('Skip option tests due to broken yahoo api')
     def setUpClass(cls):
-        pytest.skip('Skip option tests due to broken yahoo api')
         cls.aapl = Equity('AAPL')
         cls.options = OptionChain(cls.aapl)
 
@@ -98,9 +97,9 @@ class TestOptionChain(unittest.TestCase):
 
 class TestOption(unittest.TestCase):
     @classmethod
+    @unittest.skip('Skip option tests due to broken yahoo api')
     def setUpClass(cls):
         cls.aapl = Equity('AAPL')
-        pytest.skip('Skip option tests due to broken yahoo api')
         cls.options = OptionChain(cls.aapl)
 
     def test_options(self):

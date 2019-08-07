@@ -4,9 +4,6 @@ import math
 import pandas as pd
 import pandas_datareader.data as pdr
 import requests_cache
-import requests
-from bs4 import BeautifulSoup
-
 import empyrical
 
 TRADING_DAYS = 252

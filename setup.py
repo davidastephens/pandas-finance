@@ -23,13 +23,9 @@ def readme():
     with open('README.rst') as f:
         return f.read()
 
-INSTALL_REQUIRES = (
-        ['pandas',
-         'requests-cache',
-         'pandas-datareader>=0.7.0',
-         'empyrical',
-         ]
-)
+install_requires = []
+with open("./requirements.txt") as f:
+    install_requires = f.read().splitlines()
 
 setup(
     name=NAME,
@@ -58,7 +54,7 @@ setup(
         'Topic :: Scientific/Engineering',
     ],
     keywords='data',
-    install_requires=INSTALL_REQUIRES,
+    install_requires=install_requires,
     packages=find_packages(exclude=['contrib', 'docs', 'tests*']),
     test_suite='tests',
     zip_safe=False,

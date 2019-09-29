@@ -102,11 +102,12 @@ class Equity(object):
         return data.std() * math.sqrt(TRADING_DAYS)
 
     def rolling_hist_vol(self, days, end_date=None):
+        days = int(days)
         if end_date:
             data = self.returns[:end_date]
         else:
             data = self.returns
-        return pd.rolling_std(data, window=days) * math.sqrt(TRADING_DAYS)
+        return data.rolling(days).std() * math.sqrt(TRADING_DAYS)
 
     @property
     def profile(self):
@@ -177,10 +178,6 @@ class Equity(object):
             data = self.trading_data
         data = data.iloc[-days:]
         return (data['Close'] * data['Volume']).sum() / data['Volume'].sum()
-
-    def hist_vol_over_time(self, days=20):
-        days = int(days)
-        return self.returns.rolling(days).std()*math.sqrt(TRADING_DAYS)
 
     def hist_vol_by_days(self, end_date=None, min_days=10, max_days=600):
         "Returns the historical vol for a range of trading days ending on end_date."

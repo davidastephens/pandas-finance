@@ -178,6 +178,25 @@ class Equity(object):
         data = data.iloc[-days:]
         return (data['Close'] * data['Volume']).sum() / data['Volume'].sum()
 
+    def hist_vol_over_time(self, days=20):
+        days = int(days)
+        return self.returns.rolling(days).std()*math.sqrt(TRADING_DAYS)
+
+    def hist_vol_by_days(self, end_date=None, min_days=10, max_days=600):
+        "Returns the historical vol for a range of trading days ending on end_date."
+        min_days = int(min_days)
+        max_days = int(max_days)
+        if end_date:
+            returns = self.returns[:end_date]
+        else:
+            returns = self.returns
+
+        output = {}
+        for i in range(min_days, max_days):
+            output[i] = returns[-i:].std()*math.sqrt(TRADING_DAYS)
+
+        return pd.Series(output)
+
 
 class Option(object):
     def __init__(self):

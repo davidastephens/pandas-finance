@@ -67,6 +67,14 @@ class TestEquity(unittest.TestCase):
     def test_currency(self):
         self.assertEqual(self.aapl.currency, 'USD')
 
+    def test_hist_vol_over_time(self):
+        self.assertIsInstance(self.aapl.hist_vol_over_time(), pd.Series)
+        self.assertAlmostEqual(self.aapl.hist_vol_over_time(20)[self.date], 0.562, 3)
+
+    def test_hist_vol_by_days(self):
+        self.assertIsInstance(self.aapl.hist_vol_by_days(), pd.Series)
+        self.assertAlmostEqual(self.aapl.hist_vol_by_days(self.date)[20], 0.562, 3)
+
 
 class TestOptionChain(unittest.TestCase):
     @classmethod

@@ -9,8 +9,8 @@ import empyrical
 TRADING_DAYS = 252
 CACHE_HRS = 1
 START_DATE = datetime.date(1990, 1, 1)
-QUERY_STRING = 'https://query1.finance.yahoo.com/v10/finance/quoteSummary/{ticker}?lang=en-US&region=US&modules={modules}&corsDomain=finance.yahoo.com'
-YQL_STRING = 'https://query.yahooapis.com/v1/public/yql?env=store://datatables.org/alltableswithkeys&format=json&q={yql}'
+QUERY_STRING = "https://query1.finance.yahoo.com/v10/finance/quoteSummary/{ticker}?lang=en-US&region=US&modules={modules}&corsDomain=finance.yahoo.com"
+YQL_STRING = "https://query.yahooapis.com/v1/public/yql?env=store://datatables.org/alltableswithkeys&format=json&q={yql}"
 YQL_QUOTES = 'select * from yahoo.finance.quotes where symbol = "{ticker}"'
 
 
@@ -24,10 +24,11 @@ class Equity(object):
             self._session = self._get_session()
 
     def _get_session(self):
-        return requests_cache.CachedSession(cache_name='pf-cache',
-                                            backend='sqlite',
-                                            expire_after=datetime.timedelta(
-                                                hours=CACHE_HRS))
+        return requests_cache.CachedSession(
+            cache_name="pf-cache",
+            backend="sqlite",
+            expire_after=datetime.timedelta(hours=CACHE_HRS),
+        )
 
     @property
     def options(self):
@@ -36,12 +37,12 @@ class Equity(object):
     @property
     def close(self):
         """Returns pandas series of closing price"""
-        return self.trading_data['Close']
+        return self.trading_data["Close"]
 
     @property
     def adj_close(self):
         """Returns pandas series of closing price"""
-        return self.trading_data['Adj Close']
+        return self.trading_data["Adj Close"]
 
     @property
     def returns(self):
@@ -49,21 +50,21 @@ class Equity(object):
 
     @property
     def trading_data(self):
-        return pdr.get_data_yahoo(self.ticker, session=self._session,
-                                  start=START_DATE)
+        return pdr.get_data_yahoo(self.ticker, session=self._session, start=START_DATE)
 
     @property
     def dividends(self):
-        actions = pdr.get_data_yahoo_actions(self.ticker, session=self._session,
-                                             start=START_DATE)
-        dividends = actions[actions['action'] == 'DIVIDEND']['value']
-        dividends.name = 'Dividends'
+        actions = pdr.get_data_yahoo_actions(
+            self.ticker, session=self._session, start=START_DATE
+        )
+        dividends = actions[actions["action"] == "DIVIDEND"]["value"]
+        dividends.name = "Dividends"
         return dividends
 
     @property
     def annual_dividend(self):
-        if 'trailingAnnualDividendRate' in self.quotes.index:
-            return self.quotes['trailingAnnualDividendRate']
+        if "trailingAnnualDividendRate" in self.quotes.index:
+            return self.quotes["trailingAnnualDividendRate"]
         else:
             return 0
 
@@ -73,24 +74,24 @@ class Equity(object):
 
     @property
     def price(self):
-        return self.quotes['price']
+        return self.quotes["price"]
 
     @property
     def closed(self):
         "Market is closed or open"
-        return self.quotes['marketState'].lower() == 'closed'
+        return self.quotes["marketState"].lower() == "closed"
 
     @property
     def currency(self):
-        return self.quotes['currency']
+        return self.quotes["currency"]
 
     @property
     def market_cap(self):
-        return float(self.quotes['marketCap'])
+        return float(self.quotes["marketCap"])
 
     @property
     def shares_os(self):
-        return int(self.quotes['sharesOutstanding'])
+        return int(self.quotes["sharesOutstanding"])
 
     def hist_vol(self, days, end_date=None):
         days = int(days)
@@ -111,14 +112,15 @@ class Equity(object):
 
     @property
     def profile(self):
-        response = self._session.get(QUERY_STRING.format(ticker=self.ticker,
-                                                         modules='assetProfile')).json()
-        asset_profile = response['quoteSummary']['result'][0]['assetProfile']
-        del asset_profile['companyOfficers']
-        profile = pd.DataFrame.from_dict(asset_profile, orient='index')[0]
+        response = self._session.get(
+            QUERY_STRING.format(ticker=self.ticker, modules="assetProfile")
+        ).json()
+        asset_profile = response["quoteSummary"]["result"][0]["assetProfile"]
+        del asset_profile["companyOfficers"]
+        profile = pd.DataFrame.from_dict(asset_profile, orient="index")[0]
         profile.name = ""
         profile.index = [name.capitalize() for name in profile.index]
-        rename = {'Fulltimeemployees': 'Full Time Employees'}
+        rename = {"Fulltimeemployees": "Full Time Employees"}
         profile.rename(index=rename, inplace=True)
 
         return profile
@@ -133,26 +135,26 @@ class Equity(object):
 
     @property
     def sector(self):
-        return self.profile['Sector']
+        return self.profile["Sector"]
 
     @property
     def industry(self):
-        return self.profile['Industry']
+        return self.profile["Industry"]
 
     @property
     def employees(self):
-        return self.profile['Full Time Employees']
+        return self.profile["Full Time Employees"]
 
     @property
     def name(self):
-        return self.quotes['longName']
+        return self.quotes["longName"]
 
     def alpha_beta(self, index, start=None, end=None):
         index_rets = Equity(index).returns
         rets = self.returns
         data = pd.DataFrame()
-        data['Index'] = index_rets
-        data['Rets'] = rets
+        data["Index"] = index_rets
+        data["Rets"] = rets
         data = data.fillna(0)
 
         if start:
@@ -160,7 +162,7 @@ class Equity(object):
         if end:
             data = data[start:end]
 
-        return empyrical.alpha_beta(data['Rets'], data['Index'])
+        return empyrical.alpha_beta(data["Rets"], data["Index"])
 
     def beta(self, index, start=None, end=None):
         alpha, beta = self.alpha_beta(index, start, end)
@@ -177,7 +179,7 @@ class Equity(object):
         else:
             data = self.trading_data
         data = data.iloc[-days:]
-        return (data['Close'] * data['Volume']).sum() / data['Volume'].sum()
+        return (data["Close"] * data["Volume"]).sum() / data["Volume"].sum()
 
     def hist_vol_by_days(self, end_date=None, min_days=10, max_days=600):
         "Returns the historical vol for a range of trading days ending on end_date."
@@ -190,7 +192,7 @@ class Equity(object):
 
         output = {}
         for i in range(min_days, max_days):
-            output[i] = returns[-i:].std()*math.sqrt(TRADING_DAYS)
+            output[i] = returns[-i:].std() * math.sqrt(TRADING_DAYS)
 
         return pd.Series(output)
 
@@ -204,8 +206,7 @@ class OptionChain(object):
     def __init__(self, underlying):
         self.underlying = underlying
         self._session = self.underlying._session
-        self._pdr = pdr.Options(self.underlying.ticker, 'yahoo',
-                                session=self._session)
+        self._pdr = pdr.Options(self.underlying.ticker, "yahoo", session=self._session)
 
     @property
     def all_data(self):
@@ -214,13 +215,13 @@ class OptionChain(object):
     @property
     def calls(self):
         data = self.all_data
-        mask = data.index.get_level_values('Type') == 'calls'
+        mask = data.index.get_level_values("Type") == "calls"
         return data[mask]
 
     @property
     def puts(self):
         data = self.all_data
-        mask = data.index.get_level_values('Type') == 'puts'
+        mask = data.index.get_level_values("Type") == "puts"
         return data[mask]
 
     @property
@@ -236,5 +237,4 @@ class OptionChain(object):
             return getattr(self._pdr, key)
 
     def __dir__(self):
-        return sorted(set((dir(type(self)) + list(self.__dict__) +
-                           dir(self._pdr))))
+        return sorted(set((dir(type(self)) + list(self.__dict__) + dir(self._pdr))))

@@ -1,5 +1,5 @@
 import datetime
-import unittest 
+import unittest
 
 import pandas as pd
 
@@ -9,9 +9,9 @@ from pandas_finance import Equity, OptionChain
 class TestEquity(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.aapl = Equity('AAPL')
+        cls.aapl = Equity("AAPL")
         cls.date = datetime.date(2013, 1, 25)
-        cls.tsla = Equity('TSLA')
+        cls.tsla = Equity("TSLA")
 
     def test_equity_price(self):
         self.assertAlmostEqual(self.aapl.close[self.date], 62.84, 2)
@@ -19,8 +19,8 @@ class TestEquity(unittest.TestCase):
     def test_historical_vol(self):
         vol = self.aapl.hist_vol(30, end_date=self.date)
         self.assertAlmostEqual(vol, 0.484, 3)
-    
-    @unittest.skip('Yahoo options api broken')
+
+    @unittest.skip("Yahoo options api broken")
     def test_options(self):
         self.assertIsInstance(self.aapl.options, OptionChain)
 
@@ -38,34 +38,34 @@ class TestEquity(unittest.TestCase):
         self.assertIsInstance(self.aapl.price, float)
 
     def test_sector(self):
-        self.assertEqual(self.aapl.sector, 'Technology')
+        self.assertEqual(self.aapl.sector, "Technology")
 
     def test_employees(self):
         self.assertGreaterEqual(self.aapl.employees, 100000)
 
     def test_industry(self):
-        self.assertEqual(self.aapl.industry, 'Consumer Electronics')
+        self.assertEqual(self.aapl.industry, "Consumer Electronics")
 
     def test_name(self):
-        self.assertEqual(self.aapl.name, 'Apple Inc.')
-    
+        self.assertEqual(self.aapl.name, "Apple Inc.")
+
     def test_quotes(self):
-        self.assertIsInstance(self.aapl.quotes['price'], float)
-    
+        self.assertIsInstance(self.aapl.quotes["price"], float)
+
     def test_quote(self):
-        self.assertIsInstance(self.aapl.quote['price'], float)
-    
+        self.assertIsInstance(self.aapl.quote["price"], float)
+
     def test_shares_os(self):
         self.assertIsInstance(self.aapl.shares_os, int)
-    
+
     def test_market_cap(self):
         self.assertIsInstance(self.aapl.market_cap, float)
-    
+
     def test_closed(self):
         self.assertIsInstance(self.aapl.closed, bool)
 
     def test_currency(self):
-        self.assertEqual(self.aapl.currency, 'USD')
+        self.assertEqual(self.aapl.currency, "USD")
 
     def test_rolling_hist_vol(self):
         self.assertIsInstance(self.aapl.rolling_hist_vol(20), pd.Series)
@@ -78,9 +78,9 @@ class TestEquity(unittest.TestCase):
 
 class TestOptionChain(unittest.TestCase):
     @classmethod
-    @unittest.skip('Skip option tests due to broken yahoo api')
+    @unittest.skip("Skip option tests due to broken yahoo api")
     def setUpClass(cls):
-        cls.aapl = Equity('AAPL')
+        cls.aapl = Equity("AAPL")
         cls.options = OptionChain(cls.aapl)
 
     def test_options(self):
@@ -88,26 +88,34 @@ class TestOptionChain(unittest.TestCase):
 
     def test_calls(self):
         self.assertIsInstance(self.options.calls, pd.DataFrame)
-        self.assertTrue((self.options.calls.index.get_level_values('Type') == 'calls').all())
+        self.assertTrue(
+            (self.options.calls.index.get_level_values("Type") == "calls").all()
+        )
 
     def test_puts(self):
         self.assertIsInstance(self.options.puts, pd.DataFrame)
-        self.assertTrue((self.options.puts.index.get_level_values('Type') == 'puts').all())
+        self.assertTrue(
+            (self.options.puts.index.get_level_values("Type") == "puts").all()
+        )
 
     def test_near_calls(self):
         self.assertIsInstance(self.options.near_calls, pd.DataFrame)
-        self.assertTrue((self.options.near_calls.index.get_level_values('Type') == 'calls').all())
+        self.assertTrue(
+            (self.options.near_calls.index.get_level_values("Type") == "calls").all()
+        )
 
     def test_near_puts(self):
         self.assertIsInstance(self.options.near_puts, pd.DataFrame)
-        self.assertTrue((self.options.near_puts.index.get_level_values('Type') == 'puts').all())
+        self.assertTrue(
+            (self.options.near_puts.index.get_level_values("Type") == "puts").all()
+        )
 
 
 class TestOption(unittest.TestCase):
     @classmethod
-    @unittest.skip('Skip option tests due to broken yahoo api')
+    @unittest.skip("Skip option tests due to broken yahoo api")
     def setUpClass(cls):
-        cls.aapl = Equity('AAPL')
+        cls.aapl = Equity("AAPL")
         cls.options = OptionChain(cls.aapl)
 
     def test_options(self):

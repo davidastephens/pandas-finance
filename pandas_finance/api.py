@@ -53,12 +53,23 @@ class Equity(object):
                                   start=START_DATE)
 
     @property
+    def actions(self):
+        return pdr.get_data_yahoo_actions(self.ticker, session=self._session,
+                                          start=START_DATE)
+
+    @property
     def dividends(self):
-        actions = pdr.get_data_yahoo_actions(self.ticker, session=self._session,
-                                             start=START_DATE)
+        actions = self.actions
         dividends = actions[actions['action'] == 'DIVIDEND']['value']
         dividends.name = 'Dividends'
         return dividends
+
+    @property
+    def splits(self):
+        actions = self.actions
+        splits = actions[actions['action'] == 'SPLIT']['value']
+        splits.name = 'Splits'
+        return splits
 
     @property
     def annual_dividend(self):

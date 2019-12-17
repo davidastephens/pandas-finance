@@ -19,7 +19,7 @@ class TestEquity(unittest.TestCase):
     def test_historical_vol(self):
         vol = self.aapl.hist_vol(30, end_date=self.date)
         self.assertAlmostEqual(vol, 0.484, 3)
-    
+
     @unittest.skip('Yahoo options api broken')
     def test_options(self):
         self.assertIsInstance(self.aapl.options, OptionChain)
@@ -30,6 +30,9 @@ class TestEquity(unittest.TestCase):
 
     def test_dividends(self):
         self.assertEqual(self.aapl.dividends[datetime.date(2015, 11, 5)], 0.52)
+
+    def test_splits(self):
+        self.assertAlmostEqual(self.aapl.splits[datetime.date(2014, 6, 9)], 0.142857, 5)
 
     def test_dividends_no_data(self):
         self.assertEqual(len(self.tsla.dividends), 0)

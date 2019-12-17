@@ -62,7 +62,9 @@ class Equity(object):
 
     @property
     def annual_dividend(self):
-        if 'trailingAnnualDividendRate' in self.quotes.index:
+        if 'forwardAnnualDividendRate' in self.quotes.index:
+            return self.quotes['forwardAnnualDividendRate']
+        elif 'trailingAnnualDividendRate' in self.quotes.index:
             return self.quotes['trailingAnnualDividendRate']
         else:
             return 0

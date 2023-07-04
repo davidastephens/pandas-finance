@@ -2,6 +2,8 @@ import datetime
 import math
 
 import pandas as pd
+from pandas_datareader.yahoo.quotes import YahooQuotesReader
+
 import pandas_datareader.data as pdr
 import requests_cache
 import empyrical
@@ -10,8 +12,6 @@ TRADING_DAYS = 252
 CACHE_HRS = 1
 START_DATE = datetime.date(1990, 1, 1)
 QUERY_STRING = "https://query1.finance.yahoo.com/v10/finance/quoteSummary/{ticker}?lang=en-US&region=US&modules={modules}&corsDomain=finance.yahoo.com"
-YQL_STRING = "https://query.yahooapis.com/v1/public/yql?env=store://datatables.org/alltableswithkeys&format=json&q={yql}"
-YQL_QUOTES = 'select * from yahoo.finance.quotes where symbol = "{ticker}"'
 HEADERS = {
     "Connection": "keep-alive",
     "Expires": str(-1),
@@ -22,6 +22,21 @@ HEADERS = {
         "(KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
     ),
 }
+_DEFAULT_PARAMS = {
+    "lang": "en-US",
+    "corsDomain": "finance.yahoo.com",
+    ".tsrc": "finance",
+}
+
+
+class FixedYahooQuotesReader(YahooQuotesReader):
+    def __init__(self, *args, crumb=None, **kwargs):
+        super(FixedYahooQuotesReader, self).__init__(*args, **kwargs)
+        self.crumb = crumb
+    def params(self, symbol):
+        params = super().params(symbol)
+        params.update({"crumb": self.crumb})
+        return params
 
 
 class Equity(object):
@@ -32,6 +47,9 @@ class Equity(object):
             self._session = session
         else:
             self._session = self._get_session()
+            with self._session.cache_disabled():
+                self.crumb = self._session.get(
+                    'https://query1.finance.yahoo.com/v1/test/getcrumb').text
 
     def _get_session(self):
         session = requests_cache.CachedSession(
@@ -40,6 +58,8 @@ class Equity(object):
             expire_after=datetime.timedelta(hours=CACHE_HRS),
         )
         session.headers.update(HEADERS)
+        with session.cache_disabled():
+            session.get('https://fc.yahoo.com')
         return session
 
     @property
@@ -152,7 +172,8 @@ class Equity(object):
 
     @property
     def quotes(self):
-        return pdr.get_quote_yahoo(self.ticker, session=self._session).T[self.ticker]
+        return FixedYahooQuotesReader(self.ticker, session=self._session, crumb=self.crumb).read().T[
+            self.ticker]
 
     @property
     def quote(self):

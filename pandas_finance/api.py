@@ -5,6 +5,7 @@ import json
 import pandas as pd
 from pandas import DataFrame, Series
 from pandas_datareader.yahoo.quotes import YahooQuotesReader
+import yfinance as yf
 
 import pandas_datareader.data as pdr
 import requests_cache
@@ -49,6 +50,7 @@ class FixedYahooQuotesReader(YahooQuotesReader):
 class Equity(object):
     def __init__(self, ticker, session=None):
         self.ticker = ticker
+        self.yf_ticker = yf.Ticker(self.ticker)
 
         if session:
             self._session = session
@@ -99,8 +101,7 @@ class Equity(object):
 
     @property
     def dividends(self):
-        actions = self.actions
-        dividends = actions[actions["action"] == "DIVIDEND"]["value"]
+        dividends = self.yf_ticker.get_dividends()
         dividends.name = "Dividends"
         return dividends
 

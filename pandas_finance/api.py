@@ -1,7 +1,9 @@
 import datetime
 import math
+import json
 
 import pandas as pd
+from pandas import DataFrame, Series
 from pandas_datareader.yahoo.quotes import YahooQuotesReader
 
 import pandas_datareader.data as pdr
@@ -37,6 +39,11 @@ class FixedYahooQuotesReader(YahooQuotesReader):
         params = super().params(symbol)
         params.update({"crumb": self.crumb})
         return params
+    def _read_lines(self, out):
+        data = json.loads(out.read())["quoteResponse"]["result"][0]
+        idx = data.pop('symbol')
+        data["price"] = data["regularMarketPrice"]
+        return Series(data)
 
 
 class Equity(object):
@@ -172,8 +179,7 @@ class Equity(object):
 
     @property
     def quotes(self):
-        return FixedYahooQuotesReader(self.ticker, session=self._session, crumb=self.crumb).read().T[
-            self.ticker]
+        return FixedYahooQuotesReader(self.ticker, session=self._session, crumb=self.crumb).read()
 
     @property
     def quote(self):

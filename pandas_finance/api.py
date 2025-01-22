@@ -107,8 +107,7 @@ class Equity(object):
 
     @property
     def splits(self):
-        actions = self.actions
-        splits = actions[actions["action"] == "SPLIT"]["value"]
+        splits = self.yf_ticker.get_splits()
         splits.name = "Splits"
         return splits
 
